@@ -137,6 +137,9 @@ int main() {
                     particleSystem.Props.attractorStrength = 0.0f;
                     particleSystem.Props.gravity = normalGravity;
                 }
+                if (glfwGetKey(nativeWin, GLFW_KEY_R) == GLFW_PRESS) {
+                    particleSystem.reset();
+                }
             }
 
             // 渲染流程
@@ -155,6 +158,15 @@ int main() {
             if (uiMode) {
                 ImGui::Begin("Particle Control");
                 ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
+
+                // Reset button
+                ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.0f, 0.6f, 0.6f));
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.0f, 0.7f, 0.7f));
+                if (ImGui::Button("RESET PARTICLES (Press R)", ImVec2(-1.0f, 30.0f))) { // -1.0f 代表寬度填滿
+                    particleSystem.reset();
+                }
+                ImGui::PopStyleColor(2);
+
                 ImGui::Text("Count: %d", particleSystem.Props.particleCount);
                 ImGui::Separator();
 
@@ -164,7 +176,7 @@ int main() {
 
                 ImGui::DragFloat3("Gravity", &particleSystem.Props.gravity.x, 0.1f);
                 ImGui::SliderFloat("Speed", &particleSystem.Props.emitSpeed, 0.0f, 50.0f);
-                ImGui::SliderFloat("Size", &particleSystem.Props.pointScale, 100.0f, 3000.0f);
+                ImGui::SliderFloat("Size", &particleSystem.Props.pointScale, 100.0f, 5000.0f);
                 ImGui::SliderFloat("Bounce", &particleSystem.Props.bounce, 0.0f, 1.5f);
                 // ImGui::SliderFloat("Respawn Height", &particleSystem.Props.respawnHeight, -50.0f, 0.0f);
 
