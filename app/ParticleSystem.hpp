@@ -18,6 +18,11 @@ struct ParticleProps {
     float boundarySize = 80.0f;
 };
 
+struct Vertex {
+    glm::vec3 position;
+    glm::vec3 normal;
+};
+
 class ParticleSystem {
 public:
     ParticleSystem(int particleCount);
@@ -30,13 +35,15 @@ public:
 
 private:
     int m_Count;
-
-    // 資源 (使用 smart pointers 管理生命週期)
     std::unique_ptr<Buffer> m_SSBO;
     std::unique_ptr<Shader> m_ComputeShader;
     std::unique_ptr<Shader> m_RenderShader;
-
     GLuint m_VAO; // Dummy VAO
-
     void initParticles();
+
+    GLuint m_MeshVAO;
+    GLuint m_MeshVBO;
+    GLuint m_MeshEBO;
+    int m_IndexCount; // 紀錄要畫多少個索引
+    void initCubeMesh();
 };
