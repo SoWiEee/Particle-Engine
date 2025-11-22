@@ -55,6 +55,12 @@ int main() {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGui::StyleColorsDark();
+
+        ImGuiIO& io = ImGui::GetIO();
+        ImFontConfig cfg;
+        cfg.SizePixels = 22.0f;
+        io.Fonts->AddFontFromFileTTF("LINESeedTW_TTF_Bd.ttf", 22.0f, &cfg);
+
         ImGui_ImplGlfw_InitForOpenGL(window.getNativeWindow(), true);
         ImGui_ImplOpenGL3_Init("#version 450");
 
@@ -139,6 +145,7 @@ int main() {
                 }
                 if (glfwGetKey(nativeWin, GLFW_KEY_R) == GLFW_PRESS) {
                     particleSystem.reset();
+                    camera.Reset();
                 }
             }
 
@@ -155,6 +162,26 @@ int main() {
             ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
 
+            ImVec2 viewportSize = ImGui::GetMainViewport()->Size;
+            ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+
+            if (!uiMode) { // 只有在遊玩模式才顯示準心
+                ImDrawList* drawList = ImGui::GetForegroundDrawList(); // 畫在最上層
+                float crossSize = 10.0f;
+                ImU32 crossColor = IM_COL32(255, 255, 255, 150); // 半透明白
+
+                // 畫橫線
+                drawList->AddLine(
+                    ImVec2(center.x - crossSize, center.y),
+                    ImVec2(center.x + crossSize, center.y),
+                    crossColor, 2.0f);
+                // 畫直線
+                drawList->AddLine(
+                    ImVec2(center.x, center.y - crossSize),
+                    ImVec2(center.x, center.y + crossSize),
+                    crossColor, 2.0f);
+            }
+
             if (uiMode) {
                 ImGui::Begin("Particle Control");
                 ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
@@ -162,8 +189,9 @@ int main() {
                 // Reset button
                 ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.0f, 0.6f, 0.6f));
                 ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.0f, 0.7f, 0.7f));
-                if (ImGui::Button("RESET PARTICLES (Press R)", ImVec2(-1.0f, 30.0f))) { // -1.0f 代表寬度填滿
+                if (ImGui::Button("FULL RESET (Press R)", ImVec2(-1.0f, 30.0f))) {
                     particleSystem.reset();
+                    camera.Reset();
                 }
                 ImGui::PopStyleColor(2);
 
@@ -173,17 +201,55 @@ int main() {
                 ImGui::Text("Interaction Force");
                 ImGui::SliderFloat("Force Strength", &mouseStrength, 10.0f, 200.0f);
                 ImGui::Separator();
-
                 ImGui::DragFloat3("Gravity", &particleSystem.Props.gravity.x, 0.1f);
                 ImGui::SliderFloat("Speed", &particleSystem.Props.emitSpeed, 0.0f, 50.0f);
                 ImGui::SliderFloat("Size", &particleSystem.Props.pointScale, 100.0f, 5000.0f);
                 ImGui::SliderFloat("Bounce", &particleSystem.Props.bounce, 0.0f, 1.5f);
-                // ImGui::SliderFloat("Respawn Height", &particleSystem.Props.respawnHeight, -50.0f, 0.0f);
-
-                ImGui::Text("Hold Left Mouse: Attract");
-                ImGui::Text("Hold Right Mouse: Repulse");
                 ImGui::End();
             }
+
+            // 3. 右下角術式狀態 HUD
+            // 設定視窗屬性：無背景、無標題、不可移動、位於右下角
+            ImGuiWindowFlags hudFlags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoMove;
+
+            // 設定位置：右下角 (Padding 20px)
+            float PAD = 20.0f;
+            ImGui::SetNextWindowPos(ImVec2(viewportSize.x - PAD, viewportSize.y - PAD), ImGuiCond_Always, ImVec2(1.0f, 1.0f));
+
+            // 設定背景透明度 (稍微黑一點讓字清楚)
+            ImGui::SetNextWindowBgAlpha(0.3f);
+
+            if (ImGui::Begin("Spell HUD", NULL, hudFlags)) {
+                // 判斷當前術式
+                bool left = glfwGetMouseButton(nativeWin, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS;
+                bool right = glfwGetMouseButton(nativeWin, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS;
+
+                // 設定字體大小 (ImGui 預設沒有大字體，我們用 Scale 模擬，雖然會有點模糊但堪用)
+                ImGui::SetWindowFontScale(1.5f);
+
+                if (!uiMode) {
+                    if (left && right) {
+                        ImGui::TextColored(ImVec4(0.8f, 0.2f, 1.0f, 1.0f), "Hollow Technique: Purple");
+                        ImGui::TextColored(ImVec4(0.8f, 0.2f, 1.0f, 1.0f), u8"[ 虛式 · 茈 ]");
+                    }
+                    else if (left) {
+                        ImGui::TextColored(ImVec4(0.2f, 0.8f, 1.0f, 1.0f), "Cursed Technique Lapse: Blue");
+                        ImGui::TextColored(ImVec4(0.2f, 0.8f, 1.0f, 1.0f), u8"[ 術式順轉 · 蒼 ]");
+                    }
+                    else if (right) {
+                        ImGui::TextColored(ImVec4(1.0f, 0.2f, 0.2f, 1.0f), "Cursed Technique Reversal: Red");
+                        ImGui::TextColored(ImVec4(1.0f, 0.2f, 0.2f, 1.0f), u8"[ 術式反轉 · 赫 ]");
+                    }
+                    else {
+                        ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 0.5f), "Neutral Limitless");
+                        ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 0.5f), u8"[ 無下限咒術 ]");
+                    }
+                }
+                else {
+                    ImGui::TextColored(ImVec4(1, 1, 1, 0.5), "UI Mode Active");
+                }
+            }
+            ImGui::End();
 
             ImGui::Render();
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
