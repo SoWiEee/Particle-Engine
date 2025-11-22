@@ -1,0 +1,9 @@
+#version 450 core
+// 定義工作組大小 (Work Group Size)
+// 這裡表示每個 Work Group 有 128 個執行緒
+layout(local_size_x = 128, local_size_y = 1, local_size_z = 1) in;
+
+void main() {
+    // 目前什麼都不做，只是編譯測試
+    // gl_GlobalInvocationID.x 就是當前執行緒的 ID
+}
