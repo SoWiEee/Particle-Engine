@@ -125,7 +125,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\MintIce\Programming\Particle-Engine\vendor\imgui;C:\Users\MintIce\Programming\Particle-Engine\vendor\glm;C:\Users\MintIce\Programming\Particle-Engine\vendor\glad\include;C:\Users\MintIce\Programming\Particle-Engine\vendor\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\MintIce\Programming\Particle-Engine\vendor\imgui\backends;C:\Users\MintIce\Programming\Particle-Engine\vendor\imgui;C:\Users\MintIce\Programming\Particle-Engine\vendor\glm;C:\Users\MintIce\Programming\Particle-Engine\vendor\glad\include;C:\Users\MintIce\Programming\Particle-Engine\vendor\glfw\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -138,11 +138,18 @@
   <ItemGroup>
     <ClCompile Include="app\ParticleSystem.cpp" />
     <ClCompile Include="core\Buffer.cpp" />
+    <ClCompile Include="core\Camera.cpp" />
     <ClCompile Include="core\Shader.cpp" />
     <ClCompile Include="core\Types.cpp" />
     <ClCompile Include="core\Window.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="vendor\glad\src\glad.c" />
+    <ClCompile Include="vendor\imgui\backends\imgui_impl_glfw.cpp" />
+    <ClCompile Include="vendor\imgui\backends\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="vendor\imgui\imgui.cpp" />
+    <ClCompile Include="vendor\imgui\imgui_draw.cpp" />
+    <ClCompile Include="vendor\imgui\imgui_tables.cpp" />
+    <ClCompile Include="vendor\imgui\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
@@ -156,6 +163,7 @@
   <ItemGroup>
     <ClInclude Include="app\ParticleSystem.hpp" />
     <ClInclude Include="core\Buffer.hpp" />
+    <ClInclude Include="core\Camera.hpp" />
     <ClInclude Include="core\Shader.hpp" />
     <ClInclude Include="core\Types.hpp" />
     <ClInclude Include="core\Window.hpp" />

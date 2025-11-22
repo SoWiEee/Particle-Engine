@@ -1,23 +1,17 @@
 #version 450 core
 layout(local_size_x = 128) in;
-
-struct Particle {
-    vec4 position;
-    vec4 velocity;
-    vec4 color;
-};
-
-layout(std430, binding = 0) buffer ParticleSSBO {
-    Particle particles[];
-};
+struct Particle { vec4 position; vec4 velocity; vec4 color; };
+layout(std430, binding = 0) buffer ParticleSSBO { Particle particles[]; };
 
 uniform float dt;
 uniform int pCount;
-uniform float time; 
+uniform float time;
 
-float rand(vec2 co){
-    return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
-}
+uniform vec3 gravity;     // 重力方向與強度
+uniform float speed;      // 發射速度
+uniform float lifeTime;   // 粒子重生高度
+
+float rand(vec2 co){ return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453); }
 
 void main() {
     uint id = gl_GlobalInvocationID.x;
@@ -25,29 +19,24 @@ void main() {
 
     Particle p = particles[id];
 
-    // 物理計算
-    p.velocity.y += -9.8 * dt; // 重力
+    p.velocity.xyz += gravity * dt;
     p.position.xyz += p.velocity.xyz * dt;
     
-    // 隨高度變色
-    p.color = vec4(1.0, 0.5 + p.position.y * 0.1, 0.0, 1.0);
+    // 根據速度變色 (速度越快越紅，慢則變暗)
+    float speedFactor = length(p.velocity.xyz) * 0.05;
+    p.color = vec4(mix(vec3(0.1, 0.1, 0.5), vec3(1.0, 0.3, 0.1), speedFactor), 1.0);
 
-    // Respawn
-    // 如果掉到太下面 (y < -10) 或者生命週期結束
-    if (p.position.y < -10.0) {
-        // reset
+    // respawn
+    if (p.position.y < lifeTime) {
         p.position.xyz = vec3(0.0, 0.0, 0.0);
         
-        // 給予隨機向上的初速度
         float r1 = rand(vec2(id, time));
         float r2 = rand(vec2(id + 100, time));
         float r3 = rand(vec2(id + 200, time));
 
-        // x, z 隨機擴散，y 向上噴發
-        p.velocity.x = (r1 - 0.5) * 5.0; // -2.5 ~ 2.5
-        p.velocity.y = 15.0 + r2 * 5.0;  // 15 ~ 20
-        p.velocity.z = (r3 - 0.5) * 5.0; // -2.5 ~ 2.5
+        p.velocity.x = (r1 - 0.5) * 5.0;
+        p.velocity.y = speed + r2 * 5.0;  // 使用 Uniform 速度
+        p.velocity.z = (r3 - 0.5) * 5.0;
     }
-
     particles[id] = p;
 }
