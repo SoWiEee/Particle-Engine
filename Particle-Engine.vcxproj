@@ -139,9 +139,11 @@
     <ClCompile Include="app\ParticleSystem.cpp" />
     <ClCompile Include="core\Buffer.cpp" />
     <ClCompile Include="core\Camera.cpp" />
+    <ClCompile Include="core\InputHandler.cpp" />
     <ClCompile Include="core\Shader.cpp" />
     <ClCompile Include="core\Types.cpp" />
     <ClCompile Include="core\Window.cpp" />
+    <ClCompile Include="gui\GuiLayer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="vendor\glad\src\glad.c" />
     <ClCompile Include="vendor\imgui\backends\imgui_impl_glfw.cpp" />
@@ -164,10 +166,15 @@
     <ClInclude Include="app\ParticleSystem.hpp" />
     <ClInclude Include="core\Buffer.hpp" />
     <ClInclude Include="core\Camera.hpp" />
+    <ClInclude Include="core\InputHandler.hpp" />
     <ClInclude Include="core\Shader.hpp" />
     <ClInclude Include="core\Types.hpp" />
     <ClInclude Include="core\Window.hpp" />
+    <ClInclude Include="gui\GuiLayer.hpp" />
     <ClInclude Include="vendor\glad\include\glad\glad.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="assets\TsukuAOldMin_Pr6_E.ttf" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -57,6 +57,12 @@
     <ClCompile Include="vendor\imgui\backends\imgui_impl_opengl3.cpp">
       <Filter>來源檔案</Filter>
     </ClCompile>
+    <ClCompile Include="gui\GuiLayer.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
+    <ClCompile Include="core\InputHandler.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="LICENSE" />
@@ -89,5 +95,14 @@
     <ClInclude Include="core\Camera.hpp">
       <Filter>標頭檔</Filter>
     </ClInclude>
+    <ClInclude Include="gui\GuiLayer.hpp">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="core\InputHandler.hpp">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="assets\TsukuAOldMin_Pr6_E.ttf" />
   </ItemGroup>
 </Project>
