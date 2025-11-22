@@ -31,9 +31,6 @@ void ParticleSystem::initParticles() {
         p.color = glm::vec4(1.0f); // 先給全白測試
     }
 
-    // 請在建立 SSBO 之前印出這個
-    std::cout << "Size of Particle struct: " << sizeof(Particle) << " bytes" << std::endl;
-
     // create SSBO
     m_SSBO = std::make_unique<Buffer>(
         sizeof(Particle) * m_Count,

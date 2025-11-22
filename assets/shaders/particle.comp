@@ -18,10 +18,10 @@ uniform vec3 gravity;
 uniform float speed;
 uniform float lifeTime;
 
-// [新增] 互動參數
-uniform vec3 attractorPos; // 引力中心 (通常設為相機位置或滑鼠射線位置)
-uniform float attractorStrength; // 引力強度 (正=吸, 負=推, 0=無)
-uniform float bounce; // 彈力係數 (0.0 ~ 1.0)
+// 互動參數
+uniform vec3 attractorPos;
+uniform float attractorStrength;
+uniform float bounce;
 
 float rand(vec2 co){ return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453); }
 
@@ -32,12 +32,17 @@ void main() {
     Particle p = particles[id];
 
     // 1. 互動場計算 (Interaction Force)
+    // 增加一點互動半徑的變數，這裡設為 20.0
+    float interactionRadius = 20.0;
+    float distToMouse = 0.0; // 稍後顏色計算要用
+
     if (attractorStrength != 0.0) {
         vec3 dir = attractorPos - p.position.xyz;
-        float dist = length(dir);
-        // 避免除以零，並限制影響範圍
-        if (dist > 0.1 && dist < 50.0) { 
-            vec3 force = normalize(dir) * attractorStrength * (1.0 / dist); // 距離越近力量越強
+        distToMouse = length(dir);
+        
+        if (distToMouse > 0.1 && distToMouse < interactionRadius) { 
+            // 距離越近力量越強，但也加個上限避免噴飛
+            vec3 force = normalize(dir) * attractorStrength * (1.0 / max(distToMouse, 1.0)); 
             p.velocity.xyz += force * dt;
         }
     }
@@ -46,34 +51,48 @@ void main() {
     p.velocity.xyz += gravity * dt;
     p.position.xyz += p.velocity.xyz * dt;
 
-    // 3. 地面碰撞 (Floor Collision)
-    // 假設地面在 y = -10.0 (配合之前的重生高度)
-    // 為了展示反彈效果，我們把地面設高一點，例如 y = -8.0，重生在更下面
+    // 3. 地面碰撞
     float floorY = -8.0;
-
     if (p.position.y < floorY) {
-        // 位置修正 (避免陷進地板)
         p.position.y = floorY + 0.01;
-        
-        // 速度反轉 + 能量損耗 (Bounce)
-        p.velocity.y *= -bounce; 
-        
-        // 加上一點地面摩擦力 (水平速度變慢)
+        p.velocity.y *= -bounce;
         p.velocity.x *= 0.8;
         p.velocity.z *= 0.8;
     }
 
-    // 4. 顏色更新 (隨速度與彈跳變色)
+    // 4. 顏色更新 (關鍵修改區域)
+    // -----------------------------------------------------------
+    
+    // A. 基礎顏色 (根據速度：暗藍 -> 亮橘)
     float speedFactor = length(p.velocity.xyz) * 0.05;
-    // 撞擊地面變白色
+    vec3 baseColor = mix(vec3(0.1, 0.1, 0.5), vec3(1.0, 0.3, 0.1), speedFactor);
+    
+    // B. 地面碰撞變白
     if (p.position.y < floorY + 0.5) {
-         p.color = vec4(1.0, 1.0, 1.0, 1.0);
-    } else {
-         p.color = vec4(mix(vec3(0.1, 0.2, 0.8), vec3(1.0, 0.5, 0.2), speedFactor), 1.0);
+         baseColor = vec3(1.0);
+    } 
+    // C. 互動變色 (藍色/紅色)
+    else if (attractorStrength != 0.0 && distToMouse < interactionRadius) {
+        // 計算混合比例：越靠近滑鼠越顯色
+        float mixRatio = 1.0 - (distToMouse / interactionRadius);
+        mixRatio = pow(mixRatio, 2.0); // 讓中心更亮
+
+        vec3 interactionColor;
+        if (attractorStrength > 0.0) {
+            interactionColor = vec3(0.2, 0.8, 1.0); // 吸引：亮藍色 (Cyan)
+        } else {
+            interactionColor = vec3(1.0, 0.1, 0.2); // 排斥：紅色
+        }
+        
+        // 將基礎顏色與互動顏色混合
+        baseColor = mix(baseColor, interactionColor, mixRatio);
     }
 
-    // 5. 重生邏輯 (掉出邊界才重生)
-    if (p.position.y < lifeTime) { // lifeTime 設為 -20 之類的
+    p.color = vec4(baseColor, 1.0);
+    // -----------------------------------------------------------
+
+    // 5. 重生邏輯
+    if (p.position.y < lifeTime) { 
         p.position.xyz = vec3(0.0, 0.0, 0.0);
         float r1 = rand(vec2(id, time));
         float r2 = rand(vec2(id + 100, time));

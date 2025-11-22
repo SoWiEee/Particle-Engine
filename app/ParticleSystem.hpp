@@ -9,12 +9,12 @@
 struct ParticleProps {
     glm::vec3 gravity = glm::vec3(0.0f, -9.8f, 0.0f);
     float emitSpeed = 15.0f;
-    float pointScale = 500.0f;
+    float pointScale = 1000.0f;
     float respawnHeight = -20.0f;
     glm::vec3 attractorPos = glm::vec3(0.0f);
 	float attractorStrength = 0.0f; // disabled by default
     float bounce = 0.5f;
-    int particleCount = 50000;
+    int particleCount = 100000;
 };
 
 class ParticleSystem {

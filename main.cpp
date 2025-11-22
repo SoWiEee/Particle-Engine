@@ -59,6 +59,7 @@ int main() {
         ImGui_ImplOpenGL3_Init("#version 450");
 
         ParticleSystem particleSystem(50000);
+        float mouseStrength = 80.0f;
 
         glEnable(GL_PROGRAM_POINT_SIZE);
         glEnable(GL_BLEND);
@@ -104,12 +105,14 @@ int main() {
 
                 // 滑鼠互動 (引力場)
                 if (glfwGetMouseButton(nativeWin, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS) {
-                    particleSystem.Props.attractorStrength = 50.0f;
-                    particleSystem.Props.attractorPos = camera.Position + camera.Front * 10.0f;
+                    // 左鍵：吸引 (使用 mouseStrength)
+                    particleSystem.Props.attractorStrength = mouseStrength;
+                    particleSystem.Props.attractorPos = camera.Position + camera.Front * 20.0f; // 距離相機 20 單位
                 }
                 else if (glfwGetMouseButton(nativeWin, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS) {
-                    particleSystem.Props.attractorStrength = -50.0f;
-                    particleSystem.Props.attractorPos = camera.Position + camera.Front * 10.0f;
+                    // 右鍵：排斥 (使用 負的 mouseStrength)
+                    particleSystem.Props.attractorStrength = -mouseStrength;
+                    particleSystem.Props.attractorPos = camera.Position + camera.Front * 15.0f; // 斥力可以近一點
                 }
                 else {
                     particleSystem.Props.attractorStrength = 0.0f;
@@ -132,14 +135,18 @@ int main() {
             if (uiMode) {
                 ImGui::Begin("Particle Control");
                 ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
-                ImGui::Text("Particles: %d", particleSystem.Props.particleCount);
-
+                ImGui::Text("Count: %d", particleSystem.Props.particleCount);
                 ImGui::Separator();
+
+                ImGui::Text("Interaction Force");
+                ImGui::SliderFloat("Force Strength", &mouseStrength, 10.0f, 200.0f);
+                ImGui::Separator();
+
                 ImGui::DragFloat3("Gravity", &particleSystem.Props.gravity.x, 0.1f);
-                ImGui::SliderFloat("Bounce", &particleSystem.Props.bounce, 0.0f, 1.5f);
                 ImGui::SliderFloat("Speed", &particleSystem.Props.emitSpeed, 0.0f, 50.0f);
-                ImGui::SliderFloat("Point Scale", &particleSystem.Props.pointScale, 10.0f, 2000.0f);
-                ImGui::SliderFloat("Respawn Height", &particleSystem.Props.respawnHeight, -50.0f, 0.0f);
+                ImGui::SliderFloat("Size", &particleSystem.Props.pointScale, 100.0f, 3000.0f);
+                ImGui::SliderFloat("Bounce", &particleSystem.Props.bounce, 0.0f, 1.5f);
+                // ImGui::SliderFloat("Respawn Height", &particleSystem.Props.respawnHeight, -50.0f, 0.0f);
 
                 ImGui::Text("Hold Left Mouse: Attract");
                 ImGui::Text("Hold Right Mouse: Repulse");
