@@ -1,4 +1,4 @@
-#include <glad/glad.h>
+ï»¿#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <string>
@@ -59,7 +59,7 @@ int main() {
         ImGuiIO& io = ImGui::GetIO();
         ImFontConfig cfg;
         cfg.SizePixels = 22.0f;
-        io.Fonts->AddFontFromFileTTF("LINESeedTW_TTF_Bd.ttf", 22.0f, &cfg);
+        io.Fonts->AddFontFromFileTTF("assets/TsukuAOldMin_Pr6_E.ttf", 22.0f, &cfg);
 
         ImGui_ImplGlfw_InitForOpenGL(window.getNativeWindow(), true);
         ImGui_ImplOpenGL3_Init("#version 450");
@@ -89,7 +89,7 @@ int main() {
             // switch UI mode
             bool currentInsertState = glfwGetKey(window.getNativeWindow(), GLFW_KEY_INSERT) == GLFW_PRESS;
             if (currentInsertState && !lastInsertState) {
-                uiMode = !uiMode; // ¤Á´«¼Ò¦¡
+                uiMode = !uiMode; // åˆ‡æ›æ¨¡å¼
 
                 if (uiMode) {
                     glfwSetInputMode(window.getNativeWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
@@ -102,7 +102,7 @@ int main() {
 			lastInsertState = currentInsertState;   // update state
 
             if (!uiMode) {
-                // ¬Û¾÷²¾°Ê (WASD)
+                // ç›¸æ©Ÿç§»å‹• (WASD)
                 if (glfwGetKey(nativeWin, GLFW_KEY_W) == GLFW_PRESS) camera.ProcessKeyboard(FORWARD, deltaTime);
                 if (glfwGetKey(nativeWin, GLFW_KEY_S) == GLFW_PRESS) camera.ProcessKeyboard(BACKWARD, deltaTime);
                 if (glfwGetKey(nativeWin, GLFW_KEY_A) == GLFW_PRESS) camera.ProcessKeyboard(LEFT, deltaTime);
@@ -110,35 +110,35 @@ int main() {
                 if (glfwGetKey(nativeWin, GLFW_KEY_E) == GLFW_PRESS) camera.ProcessKeyboard(UP, deltaTime);
                 if (glfwGetKey(nativeWin, GLFW_KEY_Q) == GLFW_PRESS) camera.ProcessKeyboard(DOWN, deltaTime);
 
-                // ·Æ¹«ª¬ºA
+                // æ»‘é¼ ç‹€æ…‹
                 bool leftClick = glfwGetMouseButton(nativeWin, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS;
                 bool rightClick = glfwGetMouseButton(nativeWin, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS;
 
-                // ¹w³]­«¤O («ì´_¥¿±`)
+                // é è¨­é‡åŠ› (æ¢å¾©æ­£å¸¸)
                 glm::vec3 normalGravity(0.0f, -9.8f, 0.0f);
 
-                // [µê¦¡¡PÓ¥ (Hollow Purple)]¡G¦P®É«ö¦í¥ªÁä©M¥kÁä
-                // ±ø¥ó¡G±j«×·¥¤j (200)¡AµL­«¤O¡Aµµ¦â
+                // [è™›å¼Â·èŒˆ (Hollow Purple)]ï¼šåŒæ™‚æŒ‰ä½å·¦éµå’Œå³éµ
+                // æ¢ä»¶ï¼šå¼·åº¦æ¥µå¤§ (200)ï¼Œç„¡é‡åŠ›ï¼Œç´«è‰²
                 if (leftClick && rightClick) {
-                    particleSystem.Props.attractorStrength = 250.0f; // ±j«×¥ş¶}
-                    particleSystem.Props.attractorPos = camera.Position + camera.Front * 25.0f; // ±À»·¤@ÂI
-                    particleSystem.Props.gravity = glm::vec3(0.0f); // ®ø°£­«¤O¡AÅı²É¤lÄa¯B
+                    particleSystem.Props.attractorStrength = 250.0f; // å¼·åº¦å…¨é–‹
+                    particleSystem.Props.attractorPos = camera.Position + camera.Front * 25.0f; // æ¨é ä¸€é»
+                    particleSystem.Props.gravity = glm::vec3(0.0f); // æ¶ˆé™¤é‡åŠ›ï¼Œè®“ç²’å­æ‡¸æµ®
                 }
-                // [³N¦¡¶¶Âà¡P»a (Blue)]¡G¶È«ö¦í¥ªÁä
-                // ±ø¥ó¡G¥¿¦V±j«×¡A¥¿±`­«¤O(©Î·L­«¤O)¡AÂÅ¦âÁ³±Û
+                // [è¡“å¼é †è½‰Â·è’¼ (Blue)]ï¼šåƒ…æŒ‰ä½å·¦éµ
+                // æ¢ä»¶ï¼šæ­£å‘å¼·åº¦ï¼Œæ­£å¸¸é‡åŠ›(æˆ–å¾®é‡åŠ›)ï¼Œè—è‰²èºæ—‹
                 else if (leftClick) {
                     particleSystem.Props.attractorStrength = mouseStrength;
                     particleSystem.Props.attractorPos = camera.Position + camera.Front * 20.0f;
                     particleSystem.Props.gravity = normalGravity;
                 }
-                // [³N¦¡¤ÏÂà¡P»® (Red)]¡G¶È«ö¦í¥kÁä
-                // ±ø¥ó¡G­t¦V±j«×¡A¥¿±`­«¤O¡A¬õ¦â¶Ã¬y
+                // [è¡“å¼åè½‰Â·èµ« (Red)]ï¼šåƒ…æŒ‰ä½å³éµ
+                // æ¢ä»¶ï¼šè² å‘å¼·åº¦ï¼Œæ­£å¸¸é‡åŠ›ï¼Œç´…è‰²äº‚æµ
                 else if (rightClick) {
-                    particleSystem.Props.attractorStrength = -mouseStrength * 1.2f; // ¥¸¤Oµy·L¥[±j
+                    particleSystem.Props.attractorStrength = -mouseStrength * 1.2f; // æ–¥åŠ›ç¨å¾®åŠ å¼·
                     particleSystem.Props.attractorPos = camera.Position + camera.Front * 15.0f;
                     particleSystem.Props.gravity = normalGravity;
                 }
-                // [µL³N¦¡ª¬ºA]
+                // [ç„¡è¡“å¼ç‹€æ…‹]
                 else {
                     particleSystem.Props.attractorStrength = 0.0f;
                     particleSystem.Props.gravity = normalGravity;
@@ -149,15 +149,15 @@ int main() {
                 }
             }
 
-            // ´è¬V¬yµ{
+            // æ¸²æŸ“æµç¨‹
             glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            // 1. §ó·s»PÃ¸»s²É¤l
+            // 1. æ›´æ–°èˆ‡ç¹ªè£½ç²’å­
             particleSystem.onUpdate(deltaTime, currentFrame);
             particleSystem.onRender(camera);
 
-            // 2. Ã¸»s ImGui
+            // 2. ç¹ªè£½ ImGui
             ImGui_ImplOpenGL3_NewFrame();
             ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
@@ -165,17 +165,17 @@ int main() {
             ImVec2 viewportSize = ImGui::GetMainViewport()->Size;
             ImVec2 center = ImGui::GetMainViewport()->GetCenter();
 
-            if (!uiMode) { // ¥u¦³¦b¹Cª±¼Ò¦¡¤~Åã¥Ü·Ç¤ß
-                ImDrawList* drawList = ImGui::GetForegroundDrawList(); // µe¦b³Ì¤W¼h
+            if (!uiMode) { // åªæœ‰åœ¨éŠç©æ¨¡å¼æ‰é¡¯ç¤ºæº–å¿ƒ
+                ImDrawList* drawList = ImGui::GetForegroundDrawList(); // ç•«åœ¨æœ€ä¸Šå±¤
                 float crossSize = 10.0f;
-                ImU32 crossColor = IM_COL32(255, 255, 255, 150); // ¥b³z©ú¥Õ
+                ImU32 crossColor = IM_COL32(255, 255, 255, 150); // åŠé€æ˜ç™½
 
-                // µe¾î½u
+                // ç•«æ©«ç·š
                 drawList->AddLine(
                     ImVec2(center.x - crossSize, center.y),
                     ImVec2(center.x + crossSize, center.y),
                     crossColor, 2.0f);
-                // µeª½½u
+                // ç•«ç›´ç·š
                 drawList->AddLine(
                     ImVec2(center.x, center.y - crossSize),
                     ImVec2(center.x, center.y + crossSize),
@@ -208,41 +208,41 @@ int main() {
                 ImGui::End();
             }
 
-            // 3. ¥k¤U¨¤³N¦¡ª¬ºA HUD
-            // ³]©wµøµ¡Äİ©Ê¡GµL­I´º¡BµL¼ĞÃD¡B¤£¥i²¾°Ê¡B¦ì©ó¥k¤U¨¤
+            // 3. å³ä¸‹è§’è¡“å¼ç‹€æ…‹ HUD
+            // è¨­å®šè¦–çª—å±¬æ€§ï¼šç„¡èƒŒæ™¯ã€ç„¡æ¨™é¡Œã€ä¸å¯ç§»å‹•ã€ä½æ–¼å³ä¸‹è§’
             ImGuiWindowFlags hudFlags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoMove;
 
-            // ³]©w¦ì¸m¡G¥k¤U¨¤ (Padding 20px)
+            // è¨­å®šä½ç½®ï¼šå³ä¸‹è§’ (Padding 20px)
             float PAD = 20.0f;
             ImGui::SetNextWindowPos(ImVec2(viewportSize.x - PAD, viewportSize.y - PAD), ImGuiCond_Always, ImVec2(1.0f, 1.0f));
 
-            // ³]©w­I´º³z©ú«× (µy·L¶Â¤@ÂIÅı¦r²M·¡)
+            // è¨­å®šèƒŒæ™¯é€æ˜åº¦ (ç¨å¾®é»‘ä¸€é»è®“å­—æ¸…æ¥š)
             ImGui::SetNextWindowBgAlpha(0.3f);
 
             if (ImGui::Begin("Spell HUD", NULL, hudFlags)) {
-                // §PÂ_·í«e³N¦¡
+                // åˆ¤æ–·ç•¶å‰è¡“å¼
                 bool left = glfwGetMouseButton(nativeWin, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS;
                 bool right = glfwGetMouseButton(nativeWin, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS;
 
-                // ³]©w¦rÅé¤j¤p (ImGui ¹w³]¨S¦³¤j¦rÅé¡A§Ú­Ì¥Î Scale ¼ÒÀÀ¡AÁöµM·|¦³ÂI¼Ò½k¦ı³ô¥Î)
+                // è¨­å®šå­—é«”å¤§å° (ImGui é è¨­æ²’æœ‰å¤§å­—é«”ï¼Œæˆ‘å€‘ç”¨ Scale æ¨¡æ“¬ï¼Œé›–ç„¶æœƒæœ‰é»æ¨¡ç³Šä½†å ªç”¨)
                 ImGui::SetWindowFontScale(1.5f);
 
                 if (!uiMode) {
                     if (left && right) {
-                        ImGui::TextColored(ImVec4(0.8f, 0.2f, 1.0f, 1.0f), "Hollow Technique: Purple");
-                        ImGui::TextColored(ImVec4(0.8f, 0.2f, 1.0f, 1.0f), u8"[ µê¦¡ ¡P Ó¥ ]");
+                        ImGui::TextColored(ImVec4(0.8f, 0.2f, 1.0f, 1.0f), u8"è™šå¼ã€ŒèŒˆã€");
+                        ImGui::TextColored(ImVec4(0.8f, 0.2f, 1.0f, 1.0f), u8"ã‚€ã‚‰ã•ã");
                     }
                     else if (left) {
-                        ImGui::TextColored(ImVec4(0.2f, 0.8f, 1.0f, 1.0f), "Cursed Technique Lapse: Blue");
-                        ImGui::TextColored(ImVec4(0.2f, 0.8f, 1.0f, 1.0f), u8"[ ³N¦¡¶¶Âà ¡P »a ]");
+                        ImGui::TextColored(ImVec4(0.2f, 0.8f, 1.0f, 1.0f), u8"è¡“å¼é †è»¢ã€è’¼ã€");
+                        ImGui::TextColored(ImVec4(0.2f, 0.8f, 1.0f, 1.0f), u8"ã‚ãŠ");
                     }
                     else if (right) {
-                        ImGui::TextColored(ImVec4(1.0f, 0.2f, 0.2f, 1.0f), "Cursed Technique Reversal: Red");
-                        ImGui::TextColored(ImVec4(1.0f, 0.2f, 0.2f, 1.0f), u8"[ ³N¦¡¤ÏÂà ¡P »® ]");
+                        ImGui::TextColored(ImVec4(1.0f, 0.2f, 0.2f, 1.0f), u8"è¡“å¼åè»¢ã€Œèµ«ã€");
+                        ImGui::TextColored(ImVec4(1.0f, 0.2f, 0.2f, 1.0f), u8"ã‚ã‹");
                     }
                     else {
-                        ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 0.5f), "Neutral Limitless");
-                        ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 0.5f), u8"[ µL¤U­­©G³N ]");
+                        ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 0.5f), u8"ç„¡ä¸‹é™å’’è¡“");
+                        ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 0.5f), u8"ã‚€ã‹ã’ã‚“ã˜ã‚…ã˜ã‚…ã¤");
                     }
                 }
                 else {
