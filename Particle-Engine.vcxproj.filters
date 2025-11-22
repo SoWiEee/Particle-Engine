@@ -63,6 +63,9 @@
     <ClCompile Include="core\InputHandler.cpp">
       <Filter>來源檔案</Filter>
     </ClCompile>
+    <ClCompile Include="app\Scene.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="LICENSE" />
@@ -100,6 +103,9 @@
       <Filter>標頭檔</Filter>
     </ClInclude>
     <ClInclude Include="core\InputHandler.hpp">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="app\Scene.hpp">
       <Filter>標頭檔</Filter>
     </ClInclude>
   </ItemGroup>

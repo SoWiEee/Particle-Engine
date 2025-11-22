@@ -137,6 +137,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="app\ParticleSystem.cpp" />
+    <ClCompile Include="app\Scene.cpp" />
     <ClCompile Include="core\Buffer.cpp" />
     <ClCompile Include="core\Camera.cpp" />
     <ClCompile Include="core\InputHandler.cpp" />
@@ -165,6 +166,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="app\ParticleSystem.hpp" />
+    <ClInclude Include="app\Scene.hpp" />
     <ClInclude Include="core\Buffer.hpp" />
     <ClInclude Include="core\Camera.hpp" />
     <ClInclude Include="core\InputHandler.hpp" />

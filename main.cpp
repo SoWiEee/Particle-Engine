@@ -11,6 +11,7 @@
 #include "core/InputHandler.hpp"
 #include "gui/GuiLayer.hpp"
 #include "app/ParticleSystem.hpp"
+#include "app/Scene.hpp"
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
@@ -52,7 +53,9 @@ int main() {
         InputHandler input(window.getNativeWindow(), camera);
         GuiLayer gui(window.getNativeWindow());
 
-        ParticleSystem particleSystem(1000000);
+        ParticleSystem particleSystem(500000);
+        Scene scene;
+
         glEnable(GL_PROGRAM_POINT_SIZE);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
         glEnable(GL_DEPTH_TEST);
@@ -69,18 +72,16 @@ int main() {
 
             window.pollEvents();
 
-            // 1. 處理輸入 (WASD, Reset)
+            // 1. WASD, Reset
             input.processInput(deltaTime);
 
-            // 檢查是否觸發了 Reset
+            // Reset check
             if (input.shouldReset()) {
                 particleSystem.reset();
                 input.clearResetFlag();
             }
 
             // 2. 處理術式邏輯 (Gojo Logic)
-            // 這裡我們直接問 GLFW，因為 InputHandler 主要處理 Camera 和 Callback
-            // 當然你也可以把這段邏輯封裝進 InputHandler，但放在 main 裡對於 gameplay 邏輯比較直觀
             GLFWwindow* nativeWin = window.getNativeWindow();
             if (!input.isUiMode()) {
                 bool left = glfwGetMouseButton(nativeWin, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS;
@@ -105,14 +106,17 @@ int main() {
                 }
             }
 
-            // 3. 渲染流程
+            // 3. render
             glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            // draw scene
+            scene.onRender(camera, particleSystem.Props.boundarySize);
 
             particleSystem.onUpdate(deltaTime, currentFrame);
             particleSystem.onRender(camera);
 
-            // 4. 繪製 GUI
+            // 4. draw GUI
             gui.begin();
             gui.renderUI(particleSystem, mouseStrength, input.isUiMode());
             gui.end();
