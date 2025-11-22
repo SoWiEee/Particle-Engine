@@ -56,6 +56,12 @@ public:
 
     void ProcessMouseScroll(float yoffset);
 
+    void Reset();
+
 private:
     void updateCameraVectors();
+
+    glm::vec3 InitPosition;
+    float InitYaw;
+    float InitPitch;
 };
