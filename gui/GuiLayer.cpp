@@ -54,7 +54,7 @@ void GuiLayer::renderUI(ParticleSystem& particleSystem, float& mouseStrength, bo
     float PAD = 20.0f;
     // 設定位置在右下角
     ImGui::SetNextWindowPos(ImVec2(viewportSize.x - PAD, viewportSize.y - PAD), ImGuiCond_Always, ImVec2(1.0f, 1.0f));
-    ImGui::SetNextWindowBgAlpha(0.0f);
+    ImGui::SetNextWindowBgAlpha(0.5f);
 
     if (ImGui::Begin("Spell HUD", nullptr, hudFlags)) {
 
