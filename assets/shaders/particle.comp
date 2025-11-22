@@ -1,29 +1,35 @@
 #version 450 core
-layout(local_size_x = 128) in;
+layout(local_size_x = 128, local_size_y = 1, local_size_z = 1) in;
 
+// 粒子資料結構
 struct Particle {
-    vec4 position;
-    vec4 velocity;
-    vec4 color;
+    vec4 position; // xyz: 位置, w: 生命週期
+    vec4 velocity; // xyz: 速度, w: padding
+    vec4 color;    // rgba: 顏色
 };
 
+// SSBO 綁定
 layout(std430, binding = 0) buffer ParticleSSBO {
     Particle particles[];
 };
 
-uniform float dt;
-uniform int pCount;
-uniform float time;
-uniform vec3 gravity;
-uniform float speed;
-uniform float lifeTime;
+// Uniforms
+uniform float dt;             // 時間差
+uniform int pCount;           // 粒子總數
+uniform float time;           // 程式運行總時間
+uniform vec3 gravity;         // 重力
+uniform float speed;          // 發射速度
+uniform float lifeTime;       // 重生高度 Y
 
 // 互動參數
-uniform vec3 attractorPos;
-uniform float attractorStrength;
-uniform float bounce;
+uniform vec3 attractorPos;      // 術式中心點
+uniform float attractorStrength;// 術式強度 (正:吸, 負:推, >150:茈)
+uniform float bounce;           // 地面彈力
 
-float rand(vec2 co){ return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453); }
+// 偽隨機數生成器
+float rand(vec2 co){
+    return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
+}
 
 void main() {
     uint id = gl_GlobalInvocationID.x;
@@ -31,75 +37,118 @@ void main() {
 
     Particle p = particles[id];
 
-    // 1. 互動場計算 (Interaction Force)
-    // 增加一點互動半徑的變數，這裡設為 20.0
-    float interactionRadius = 20.0;
-    float distToMouse = 0.0; // 稍後顏色計算要用
+    // --- 1. 術式互動物理 (Jujutsu Physics) ---
+    float interactionRadius = 40.0; // 術式影響範圍
+    float distToMouse = 0.0;
+    bool isInteracting = false;
 
     if (attractorStrength != 0.0) {
         vec3 dir = attractorPos - p.position.xyz;
         distToMouse = length(dir);
-        
-        if (distToMouse > 0.1 && distToMouse < interactionRadius) { 
-            // 距離越近力量越強，但也加個上限避免噴飛
-            vec3 force = normalize(dir) * attractorStrength * (1.0 / max(distToMouse, 1.0)); 
-            p.velocity.xyz += force * dt;
+        vec3 dirNorm = normalize(dir);
+
+        if (distToMouse > 0.2 && distToMouse < interactionRadius) {
+            isInteracting = true;
+
+            // F = Strength / r^2 (距離越近力量越大，模擬黑洞引力)
+            // 加上 +0.5 防止除以零導致粒子射飛
+            float forceMag = attractorStrength * (15.0 / (distToMouse * distToMouse + 0.5));
+            
+            // 限制最大力道
+            forceMag = clamp(forceMag, -800.0, 800.0);
+
+            vec3 finalForce = dirNorm * forceMag;
+
+            // [虛式·茈] (Hollow Purple): 超強吸力，無螺旋，純粹的毀滅
+            if (abs(attractorStrength) > 150.0) {
+                 // 更加暴力的吸力，並且無視空氣阻力
+                 finalForce *= 1.5;
+            }
+            // [術式順轉·蒼] (Azure Glow): 吸力 + 螺旋 (Vortex)
+            else if (attractorStrength > 0.0) {
+                // 計算螺旋方向：將指向中心的向量與 Y 軸做外積
+                // 這會產生水平旋轉的分量
+                vec3 spiralDir = cross(dirNorm, vec3(0.0, 1.0, 0.0));
+                
+                // 疊加螺旋力：離中心越近，旋轉越快
+                finalForce += spiralDir * (forceMag * 0.8); 
+                
+                // 空氣阻力：讓粒子在旋轉時慢慢靠近中心，而不是永遠繞圈
+                p.velocity.xyz *= 0.98; 
+            }
+            // [術式反轉·赫] (Red Glow): 斥力 + 亂流 (Chaos)
+            else {
+                // 加入隨機雜訊，模擬爆炸的亂流
+                float noise = rand(vec2(id, time * 5.0)) - 0.5;
+                // 讓斥力帶有隨機抖動
+                finalForce += vec3(noise) * 80.0; 
+            }
+
+            // 施加力量
+            p.velocity.xyz += finalForce * dt;
         }
     }
 
-    // 2. 基本物理
+    // --- 2. 基礎物理 ---
     p.velocity.xyz += gravity * dt;
     p.position.xyz += p.velocity.xyz * dt;
 
-    // 3. 地面碰撞
+    // --- 3. 地面碰撞 ---
     float floorY = -8.0;
     if (p.position.y < floorY) {
         p.position.y = floorY + 0.01;
         p.velocity.y *= -bounce;
-        p.velocity.x *= 0.8;
-        p.velocity.z *= 0.8;
+        // 地面摩擦力
+        p.velocity.x *= 0.85;
+        p.velocity.z *= 0.85;
     }
 
-    // 4. 顏色更新 (關鍵修改區域)
-    // -----------------------------------------------------------
+    // --- 4. 視覺顏色處理 (Visuals) ---
     
-    // A. 基礎顏色 (根據速度：暗藍 -> 亮橘)
-    float speedFactor = length(p.velocity.xyz) * 0.05;
-    vec3 baseColor = mix(vec3(0.1, 0.1, 0.5), vec3(1.0, 0.3, 0.1), speedFactor);
-    
-    // B. 地面碰撞變白
-    if (p.position.y < floorY + 0.5) {
-         baseColor = vec3(1.0);
-    } 
-    // C. 互動變色 (藍色/紅色)
-    else if (attractorStrength != 0.0 && distToMouse < interactionRadius) {
-        // 計算混合比例：越靠近滑鼠越顯色
-        float mixRatio = 1.0 - (distToMouse / interactionRadius);
-        mixRatio = pow(mixRatio, 2.0); // 讓中心更亮
+    // 基礎顏色：根據速度決定 (暗藍 -> 亮橘)
+    float speedFactor = length(p.velocity.xyz) * 0.03;
+    vec3 color = mix(vec3(0.05, 0.1, 0.3), vec3(1.0, 0.4, 0.1), speedFactor);
 
-        vec3 interactionColor;
-        if (attractorStrength > 0.0) {
-            interactionColor = vec3(0.2, 0.8, 1.0); // 吸引：亮藍色 (Cyan)
+    // 術式發光效果
+    if (isInteracting) {
+        // 距離權重：越靠近中心越亮 (Power 4.0 讓核心極亮，邊緣遞減快)
+        float glow = 1.0 - (distToMouse / interactionRadius);
+        glow = pow(glow, 3.0); 
+
+        vec3 spellColor;
+
+        // 判定術式類型
+        if (abs(attractorStrength) > 150.0) {
+            // [茈]：核心白，外圍紫，超高亮度
+            spellColor = vec3(0.6, 0.0, 1.0) * 4.0; 
+        } else if (attractorStrength > 0.0) {
+            // [蒼]：青藍色 (Cyan)
+            spellColor = vec3(0.1, 0.9, 1.0) * 2.5;
         } else {
-            interactionColor = vec3(1.0, 0.1, 0.2); // 排斥：紅色
+            // [赫]：鮮紅色
+            spellColor = vec3(1.0, 0.1, 0.1) * 2.5;
         }
         
-        // 將基礎顏色與互動顏色混合
-        baseColor = mix(baseColor, interactionColor, mixRatio);
+        // 混合顏色
+        color = mix(color, spellColor, glow);
+    }
+    
+    // 地面接觸變白
+    if (p.position.y < floorY + 0.5) {
+        color = vec3(1.0);
     }
 
-    p.color = vec4(baseColor, 1.0);
-    // -----------------------------------------------------------
+    p.color = vec4(color, 1.0);
 
-    // 5. 重生邏輯
-    if (p.position.y < lifeTime) { 
+    // --- 5. 粒子重生 ---
+    if (p.position.y < lifeTime) {
         p.position.xyz = vec3(0.0, 0.0, 0.0);
         float r1 = rand(vec2(id, time));
         float r2 = rand(vec2(id + 100, time));
         float r3 = rand(vec2(id + 200, time));
-        p.velocity.x = (r1 - 0.5) * 5.0;
+        p.velocity.x = (r1 - 0.5) * 10.0; // 擴大重生範圍
         p.velocity.y = speed + r2 * 5.0;
-        p.velocity.z = (r3 - 0.5) * 5.0;
+        p.velocity.z = (r3 - 0.5) * 10.0;
     }
 
     particles[id] = p;
