@@ -1,15 +1,27 @@
 #version 450 core
 layout(local_size_x = 128) in;
-struct Particle { vec4 position; vec4 velocity; vec4 color; };
-layout(std430, binding = 0) buffer ParticleSSBO { Particle particles[]; };
+
+struct Particle {
+    vec4 position;
+    vec4 velocity;
+    vec4 color;
+};
+
+layout(std430, binding = 0) buffer ParticleSSBO {
+    Particle particles[];
+};
 
 uniform float dt;
 uniform int pCount;
 uniform float time;
+uniform vec3 gravity;
+uniform float speed;
+uniform float lifeTime;
 
-uniform vec3 gravity;     // 重力方向與強度
-uniform float speed;      // 發射速度
-uniform float lifeTime;   // 粒子重生高度
+// [新增] 互動參數
+uniform vec3 attractorPos; // 引力中心 (通常設為相機位置或滑鼠射線位置)
+uniform float attractorStrength; // 引力強度 (正=吸, 負=推, 0=無)
+uniform float bounce; // 彈力係數 (0.0 ~ 1.0)
 
 float rand(vec2 co){ return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453); }
 
@@ -19,24 +31,57 @@ void main() {
 
     Particle p = particles[id];
 
+    // 1. 互動場計算 (Interaction Force)
+    if (attractorStrength != 0.0) {
+        vec3 dir = attractorPos - p.position.xyz;
+        float dist = length(dir);
+        // 避免除以零，並限制影響範圍
+        if (dist > 0.1 && dist < 50.0) { 
+            vec3 force = normalize(dir) * attractorStrength * (1.0 / dist); // 距離越近力量越強
+            p.velocity.xyz += force * dt;
+        }
+    }
+
+    // 2. 基本物理
     p.velocity.xyz += gravity * dt;
     p.position.xyz += p.velocity.xyz * dt;
-    
-    // 根據速度變色 (速度越快越紅，慢則變暗)
-    float speedFactor = length(p.velocity.xyz) * 0.05;
-    p.color = vec4(mix(vec3(0.1, 0.1, 0.5), vec3(1.0, 0.3, 0.1), speedFactor), 1.0);
 
-    // respawn
-    if (p.position.y < lifeTime) {
-        p.position.xyz = vec3(0.0, 0.0, 0.0);
+    // 3. 地面碰撞 (Floor Collision)
+    // 假設地面在 y = -10.0 (配合之前的重生高度)
+    // 為了展示反彈效果，我們把地面設高一點，例如 y = -8.0，重生在更下面
+    float floorY = -8.0;
+
+    if (p.position.y < floorY) {
+        // 位置修正 (避免陷進地板)
+        p.position.y = floorY + 0.01;
         
+        // 速度反轉 + 能量損耗 (Bounce)
+        p.velocity.y *= -bounce; 
+        
+        // 加上一點地面摩擦力 (水平速度變慢)
+        p.velocity.x *= 0.8;
+        p.velocity.z *= 0.8;
+    }
+
+    // 4. 顏色更新 (隨速度與彈跳變色)
+    float speedFactor = length(p.velocity.xyz) * 0.05;
+    // 撞擊地面變白色
+    if (p.position.y < floorY + 0.5) {
+         p.color = vec4(1.0, 1.0, 1.0, 1.0);
+    } else {
+         p.color = vec4(mix(vec3(0.1, 0.2, 0.8), vec3(1.0, 0.5, 0.2), speedFactor), 1.0);
+    }
+
+    // 5. 重生邏輯 (掉出邊界才重生)
+    if (p.position.y < lifeTime) { // lifeTime 設為 -20 之類的
+        p.position.xyz = vec3(0.0, 0.0, 0.0);
         float r1 = rand(vec2(id, time));
         float r2 = rand(vec2(id + 100, time));
         float r3 = rand(vec2(id + 200, time));
-
         p.velocity.x = (r1 - 0.5) * 5.0;
-        p.velocity.y = speed + r2 * 5.0;  // 使用 Uniform 速度
+        p.velocity.y = speed + r2 * 5.0;
         p.velocity.z = (r3 - 0.5) * 5.0;
     }
+
     particles[id] = p;
 }

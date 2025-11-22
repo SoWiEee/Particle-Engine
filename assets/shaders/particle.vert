@@ -17,7 +17,7 @@ void main() {
     
     // 根據距離調整點大小
     float dist = length(gl_Position.xyz);
-    gl_PointSize = pointScale / dist;
+    gl_Position = projection * view * p.position;
 
     vColor = p.color;
 }

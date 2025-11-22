@@ -21,24 +21,32 @@ extern "C" {
 
 Camera camera(glm::vec3(0.0f, 10.0f, 40.0f));
 
-float lastX = 640, lastY = 360;
+float lastX = 640.0f, lastY = 360.0f;
 bool firstMouse = true;
-bool uiMode = false; // 按 Space 切換：控制相機 <-> 控制 UI
+bool uiMode = false;
 bool lastInsertState = false;
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     if (uiMode) return;
 
-    if (firstMouse) { lastX = xpos; lastY = ypos; firstMouse = false; }
-    float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos;
-    lastX = xpos; lastY = ypos;
+    if (firstMouse) {
+        lastX = static_cast<float>(xpos);
+        lastY = static_cast<float>(ypos);
+        firstMouse = false;
+    }
+
+    float xoffset = static_cast<float>(xpos) - lastX;
+    float yoffset = lastY - static_cast<float>(ypos);
+
+    lastX = static_cast<float>(xpos);
+    lastY = static_cast<float>(ypos);
+
     camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
 int main() {
     try {
-        Window window(1280, 720, "GPU Particles - Stage 5");
+        Window window(1280, 720, "GPU Particle System - Final Stage");
 
         glfwSetCursorPosCallback(window.getNativeWindow(), mouse_callback);
         glfwSetInputMode(window.getNativeWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -52,11 +60,15 @@ int main() {
 
         ParticleSystem particleSystem(50000);
 
+        glEnable(GL_PROGRAM_POINT_SIZE);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
         float deltaTime = 0.0f;
         float lastFrame = 0.0f;
 
         while (!window.shouldClose()) {
-            float currentFrame = glfwGetTime();
+            float currentFrame = static_cast<float>(glfwGetTime());
             deltaTime = currentFrame - lastFrame;
             lastFrame = currentFrame;
 
@@ -73,11 +85,9 @@ int main() {
                 uiMode = !uiMode; // 切換模式
 
                 if (uiMode) {
-                    // UI 模式：顯示滑鼠，停止相機轉動
                     glfwSetInputMode(window.getNativeWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
                 }
                 else {
-                    // 漫遊模式：隱藏滑鼠，重置 firstMouse 防止視角跳動
                     glfwSetInputMode(window.getNativeWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
                     firstMouse = true;
                 }
@@ -91,6 +101,19 @@ int main() {
                 if (glfwGetKey(nativeWin, GLFW_KEY_D) == GLFW_PRESS) camera.ProcessKeyboard(RIGHT, deltaTime);
                 if (glfwGetKey(nativeWin, GLFW_KEY_Q) == GLFW_PRESS) camera.ProcessKeyboard(DOWN, deltaTime);
                 if (glfwGetKey(nativeWin, GLFW_KEY_E) == GLFW_PRESS) camera.ProcessKeyboard(UP, deltaTime);
+
+                // 滑鼠互動 (引力場)
+                if (glfwGetMouseButton(nativeWin, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS) {
+                    particleSystem.Props.attractorStrength = 50.0f;
+                    particleSystem.Props.attractorPos = camera.Position + camera.Front * 10.0f;
+                }
+                else if (glfwGetMouseButton(nativeWin, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS) {
+                    particleSystem.Props.attractorStrength = -50.0f;
+                    particleSystem.Props.attractorPos = camera.Position + camera.Front * 10.0f;
+                }
+                else {
+                    particleSystem.Props.attractorStrength = 0.0f;
+                }
             }
 
             // 渲染流程
@@ -99,11 +122,7 @@ int main() {
 
             // 1. 更新與繪製粒子
             particleSystem.onUpdate(deltaTime, currentFrame);
-
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE); // Additive
             particleSystem.onRender(camera);
-            glDisable(GL_BLEND);
 
             // 2. 繪製 ImGui
             ImGui_ImplOpenGL3_NewFrame();
@@ -117,10 +136,13 @@ int main() {
 
                 ImGui::Separator();
                 ImGui::DragFloat3("Gravity", &particleSystem.Props.gravity.x, 0.1f);
-                ImGui::SliderFloat("Emit Speed", &particleSystem.Props.emitSpeed, 0.0f, 100.0f);
+                ImGui::SliderFloat("Bounce", &particleSystem.Props.bounce, 0.0f, 1.5f);
+                ImGui::SliderFloat("Speed", &particleSystem.Props.emitSpeed, 0.0f, 50.0f);
                 ImGui::SliderFloat("Point Scale", &particleSystem.Props.pointScale, 10.0f, 2000.0f);
                 ImGui::SliderFloat("Respawn Height", &particleSystem.Props.respawnHeight, -50.0f, 0.0f);
 
+                ImGui::Text("Hold Left Mouse: Attract");
+                ImGui::Text("Hold Right Mouse: Repulse");
                 ImGui::End();
             }
 

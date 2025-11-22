@@ -1,5 +1,6 @@
 #include "ParticleSystem.hpp"
 #include <random>
+#include <iostream>
 
 ParticleSystem::ParticleSystem(int particleCount) : m_Count(particleCount) {
     m_ComputeShader = std::make_unique<Shader>("assets/shaders/particle.comp");
@@ -18,11 +19,20 @@ ParticleSystem::~ParticleSystem() {
 void ParticleSystem::initParticles() {
     std::vector<Particle> data(m_Count);
 
+    // rng
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> distPos(-10.0f, 10.0f);
+    std::uniform_real_distribution<float> distVel(-2.0f, 2.0f);
+
     for (auto& p : data) {
-        p.position = glm::vec4(0.0f);
-        p.velocity = glm::vec4(0.0f);
-        p.color = glm::vec4(1.0f);
+        p.position = glm::vec4(distPos(gen), distPos(gen) + 10.0f, distPos(gen), 1.0f);
+        p.velocity = glm::vec4(distVel(gen), distVel(gen), distVel(gen), 0.0f);
+        p.color = glm::vec4(1.0f); // 先給全白測試
     }
+
+    // 請在建立 SSBO 之前印出這個
+    std::cout << "Size of Particle struct: " << sizeof(Particle) << " bytes" << std::endl;
 
     // create SSBO
     m_SSBO = std::make_unique<Buffer>(
@@ -38,10 +48,15 @@ void ParticleSystem::onUpdate(float dt, float totalTime) {
     m_ComputeShader->setFloat("time", totalTime);
     m_ComputeShader->setInt("pCount", m_Count);
 
-    // 傳遞新參數
+    // 傳遞參數
     m_ComputeShader->setVec3("gravity", Props.gravity);
     m_ComputeShader->setFloat("speed", Props.emitSpeed);
     m_ComputeShader->setFloat("lifeTime", Props.respawnHeight);
+
+    // 傳遞互動參數
+    m_ComputeShader->setVec3("attractorPos", Props.attractorPos);
+    m_ComputeShader->setFloat("attractorStrength", Props.attractorStrength);
+    m_ComputeShader->setFloat("bounce", Props.bounce);
 
     m_SSBO->bindBase(0);
     glDispatchCompute((m_Count + 127) / 128, 1, 1);
