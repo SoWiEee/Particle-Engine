@@ -60,6 +60,10 @@ void ParticleSystem::onUpdate(float dt, float totalTime) {
     m_ComputeShader->setFloat("attractorStrength", Props.attractorStrength);
     m_ComputeShader->setFloat("bounce", Props.bounce);
     m_ComputeShader->setFloat("boundarySize", Props.boundarySize);
+    m_ComputeShader->setVec3("colorBase", Props.colorBase);
+    m_ComputeShader->setVec3("colorBlue", Props.colorBlue);
+    m_ComputeShader->setVec3("colorRed", Props.colorRed);
+    m_ComputeShader->setVec3("colorPurple", Props.colorPurple);
 
     m_SSBO->bindBase(0);
     glDispatchCompute((m_Count + 127) / 128, 1, 1);

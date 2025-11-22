@@ -16,6 +16,10 @@ struct ParticleProps {
     float bounce = 0.5f;
     int particleCount = 100000;
     float boundarySize = 80.0f;
+    glm::vec3 colorBase = glm::vec3(0.05f, 0.1f, 0.3f);
+    glm::vec3 colorBlue = glm::vec3(0.1f, 0.9f, 1.0f);
+    glm::vec3 colorRed = glm::vec3(1.0f, 0.1f, 0.1f);
+    glm::vec3 colorPurple = glm::vec3(0.7f, 0.0f, 1.0f);
 };
 
 struct Vertex {

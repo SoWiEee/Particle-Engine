@@ -2,10 +2,7 @@
 #include <vector>
 
 Scene::Scene() {
-    // 1. 初始化平面網格
     initPlaneMesh();
-
-    // 2. 載入 Grid Shader (稍後建立)
     m_GridShader = std::make_unique<Shader>("assets/shaders/grid.vert", "assets/shaders/grid.frag");
 }
 
@@ -15,8 +12,7 @@ Scene::~Scene() {
 }
 
 void Scene::initPlaneMesh() {
-    // 一個簡單的平面 (兩個三角形)
-    // X, Y, Z
+
     float vertices[] = {
          1.0f, 0.0f,  1.0f,
         -1.0f, 0.0f,  1.0f,
@@ -38,17 +34,21 @@ void Scene::initPlaneMesh() {
     glVertexArrayAttribBinding(m_VAO, 0, 0);
 }
 
-void Scene::onRender(const Camera& camera, float boundarySize) {
+void Scene::onRender(const Camera& camera, float boundarySize, glm::vec3 lightPos, float strength, glm::vec3 color) {
     glEnable(GL_DEPTH_TEST);
 
     m_GridShader->use();
     m_GridShader->setMat4("view", camera.GetViewMatrix());
-    m_GridShader->setMat4("projection", camera.GetProjectionMatrix(1280.0f, 720.0f)); // 解析度可改成動態
+    m_GridShader->setMat4("projection", camera.GetProjectionMatrix(1280.0f, 720.0f));
 
-    // 傳入相機位置與遠近平面，用於計算漸層消失 (Fading)
+    // Fading
     m_GridShader->setVec3("cameraPos", camera.Position);
-    m_GridShader->setFloat("farPlane", 2000.0f); // 視線最遠距離
-    m_GridShader->setFloat("boundarySize", boundarySize); // 用於限制網格範圍
+    m_GridShader->setFloat("farPlane", 2000.0f);
+    m_GridShader->setFloat("boundarySize", boundarySize);
+
+    m_GridShader->setVec3("attractorPos", lightPos);
+    m_GridShader->setFloat("attractorStrength", strength);
+    m_GridShader->setVec3("lightColor", color);
 
     glBindVertexArray(m_VAO);
 

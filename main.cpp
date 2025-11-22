@@ -12,6 +12,7 @@
 #include "gui/GuiLayer.hpp"
 #include "app/ParticleSystem.hpp"
 #include "app/Scene.hpp"
+#include "core/rendering/BloomRenderer.hpp"
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
@@ -55,6 +56,8 @@ int main() {
 
         ParticleSystem particleSystem(500000);
         Scene scene;
+        BloomRenderer bloom(1280, 720);
+        float exposure = 1.0f;
 
         glEnable(GL_PROGRAM_POINT_SIZE);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -106,17 +109,32 @@ int main() {
                 }
             }
 
-            // 3. render
+            // render
             glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+            // 決定當前術式顏色 (用於傳給地板)
+            glm::vec3 currentSpellColor = particleSystem.Props.colorBase;
+            if (abs(particleSystem.Props.attractorStrength) > 180.0) currentSpellColor = particleSystem.Props.colorPurple;
+            else if (particleSystem.Props.attractorStrength > 0) currentSpellColor = particleSystem.Props.colorBlue;
+            else if (particleSystem.Props.attractorStrength < 0) currentSpellColor = particleSystem.Props.colorRed;
+
+            // HDR FBO (Off-screen)
+            bloom.bindForWriting();
+
             // draw scene
-            scene.onRender(camera, particleSystem.Props.boundarySize);
+            scene.onRender(camera, particleSystem.Props.boundarySize,
+                particleSystem.Props.attractorPos,
+                particleSystem.Props.attractorStrength,
+                currentSpellColor);
 
             particleSystem.onUpdate(deltaTime, currentFrame);
             particleSystem.onRender(camera);
 
-            // 4. draw GUI
+            // Post-Processing (Bloom + Tone Mapping)
+            bloom.renderBloom(exposure);
+
+            // draw GUI
             gui.begin();
             gui.renderUI(particleSystem, mouseStrength, input.isUiMode());
             gui.end();

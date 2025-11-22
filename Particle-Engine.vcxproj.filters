@@ -66,6 +66,9 @@
     <ClCompile Include="app\Scene.cpp">
       <Filter>來源檔案</Filter>
     </ClCompile>
+    <ClCompile Include="core\rendering\BloomRenderer.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="LICENSE" />
@@ -76,6 +79,12 @@
     <None Include=".gitignore" />
     <None Include="assets\shaders\particle_mesh.frag" />
     <None Include="assets\shaders\particle_mesh.vert" />
+    <None Include="assets\shaders\grid.frag" />
+    <None Include="assets\shaders\grid.vert" />
+    <None Include="assets\shaders\blur.frag" />
+    <None Include="assets\shaders\blur.vert" />
+    <None Include="assets\shaders\final.frag" />
+    <None Include="assets\shaders\final.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\Window.hpp">
@@ -106,6 +115,9 @@
       <Filter>標頭檔</Filter>
     </ClInclude>
     <ClInclude Include="app\Scene.hpp">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="core\rendering\BloomRenderer.hpp">
       <Filter>標頭檔</Filter>
     </ClInclude>
   </ItemGroup>

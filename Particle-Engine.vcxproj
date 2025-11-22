@@ -141,6 +141,7 @@
     <ClCompile Include="core\Buffer.cpp" />
     <ClCompile Include="core\Camera.cpp" />
     <ClCompile Include="core\InputHandler.cpp" />
+    <ClCompile Include="core\rendering\BloomRenderer.cpp" />
     <ClCompile Include="core\Shader.cpp" />
     <ClCompile Include="core\Types.cpp" />
     <ClCompile Include="core\Window.cpp" />
@@ -156,6 +157,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
+    <None Include="assets\shaders\blur.frag" />
+    <None Include="assets\shaders\blur.vert" />
+    <None Include="assets\shaders\final.frag" />
+    <None Include="assets\shaders\final.vert" />
+    <None Include="assets\shaders\grid.frag" />
+    <None Include="assets\shaders\grid.vert" />
     <None Include="assets\shaders\particle.comp" />
     <None Include="assets\shaders\particle.frag" />
     <None Include="assets\shaders\particle.vert" />
@@ -170,6 +177,7 @@
     <ClInclude Include="core\Buffer.hpp" />
     <ClInclude Include="core\Camera.hpp" />
     <ClInclude Include="core\InputHandler.hpp" />
+    <ClInclude Include="core\rendering\BloomRenderer.hpp" />
     <ClInclude Include="core\Shader.hpp" />
     <ClInclude Include="core\Types.hpp" />
     <ClInclude Include="core\Window.hpp" />
