@@ -55,6 +55,9 @@ void Shader::setVec3(const std::string& name, const glm::vec3& value) const {
 void Shader::setMat4(const std::string& name, const glm::mat4& mat) const {
     glProgramUniformMatrix4fv(m_ID, glGetUniformLocation(m_ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
 }
+void Shader::setBool(const std::string& name, bool value) const {
+    glProgramUniform1i(m_ID, glGetUniformLocation(m_ID, name.c_str()), (int)value);
+}
 
 
 std::string Shader::readFile(const std::string& path) {

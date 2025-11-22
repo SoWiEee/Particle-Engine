@@ -54,6 +54,7 @@ void ParticleSystem::onUpdate(float dt, float totalTime) {
     m_ComputeShader->setVec3("attractorPos", Props.attractorPos);
     m_ComputeShader->setFloat("attractorStrength", Props.attractorStrength);
     m_ComputeShader->setFloat("bounce", Props.bounce);
+    m_ComputeShader->setFloat("boundarySize", Props.boundarySize);
 
     m_SSBO->bindBase(0);
     glDispatchCompute((m_Count + 127) / 128, 1, 1);

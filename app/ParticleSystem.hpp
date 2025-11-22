@@ -15,6 +15,7 @@ struct ParticleProps {
 	float attractorStrength = 0.0f; // disabled by default
     float bounce = 0.5f;
     int particleCount = 100000;
+    float boundarySize = 80.0f;
 };
 
 class ParticleSystem {

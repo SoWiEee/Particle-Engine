@@ -25,6 +25,7 @@ uniform float lifeTime;       // 重生高度 Y
 uniform vec3 attractorPos;      // 術式中心點
 uniform float attractorStrength;// 術式強度 (正:吸, 負:推, >150:茈)
 uniform float bounce;           // 地面彈力
+uniform float boundarySize;
 
 // 偽隨機數生成器
 float rand(vec2 co){
@@ -94,13 +95,26 @@ void main() {
     p.position.xyz += p.velocity.xyz * dt;
 
     // --- 3. 地面碰撞 ---
+    if (abs(p.position.x) > boundarySize) { 
+        p.position.x = sign(p.position.x) * boundarySize; 
+        p.velocity.x *= -0.8; 
+    }
+    if (abs(p.position.z) > boundarySize) { 
+        p.position.z = sign(p.position.z) * boundarySize; 
+        p.velocity.z *= -0.8; 
+    }
+    // 天花板
+    if (p.position.y > boundarySize * 1.5) {
+        p.position.y = boundarySize * 1.5;
+        p.velocity.y *= -0.8;
+    }
+    // 地板
     float floorY = -8.0;
     if (p.position.y < floorY) {
         p.position.y = floorY + 0.01;
         p.velocity.y *= -bounce;
-        // 地面摩擦力
-        p.velocity.x *= 0.85;
-        p.velocity.z *= 0.85;
+        p.velocity.x *= 0.8;
+        p.velocity.z *= 0.8;
     }
 
     // --- 4. 視覺顏色處理 (Visuals) ---
