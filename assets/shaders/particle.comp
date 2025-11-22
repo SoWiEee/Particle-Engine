@@ -27,6 +27,12 @@ uniform float attractorStrength;// 術式強度 (正:吸, 負:推, >150:茈)
 uniform float bounce;           // 地面彈力
 uniform float boundarySize;
 
+// 顏色
+uniform vec3 colorBase;
+uniform vec3 colorBlue;
+uniform vec3 colorRed;
+uniform vec3 colorPurple;
+
 // 偽隨機數生成器
 float rand(vec2 co){
     return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
@@ -121,7 +127,21 @@ void main() {
     
     // 基礎顏色：根據速度決定 (暗藍 -> 亮橘)
     float speedFactor = length(p.velocity.xyz) * 0.03;
+    vec3 base = mix(colorBase * 0.5, colorBase * 2.0, speedFactor);
     vec3 color = mix(vec3(0.05, 0.1, 0.3), vec3(1.0, 0.4, 0.1), speedFactor);
+
+    if (isInteracting) {
+        float glow = 1.0 - (distToMouse / interactionRadius);
+        glow = pow(glow, 3.0);
+        vec3 spellColor;
+        
+        // [修改] 使用 Uniform 顏色
+        if (abs(attractorStrength) > 180.0) spellColor = colorPurple * 5.0; // *5.0 是為了 Bloom 更亮
+        else if (attractorStrength > 0.0) spellColor = colorBlue * 3.0;
+        else spellColor = colorRed * 3.0;
+        
+        base = mix(base, spellColor, glow);
+    }
 
     // 術式發光效果
     if (isInteracting) {
