@@ -33,6 +33,9 @@
     <ClCompile Include="core\Buffer.cpp">
       <Filter>來源檔案</Filter>
     </ClCompile>
+    <ClCompile Include="app\ParticleSystem.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="LICENSE" />
@@ -57,6 +60,9 @@
       <Filter>標頭檔</Filter>
     </ClInclude>
     <ClInclude Include="core\Buffer.hpp">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="app\ParticleSystem.hpp">
       <Filter>標頭檔</Filter>
     </ClInclude>
   </ItemGroup>

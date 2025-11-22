@@ -136,6 +136,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="app\ParticleSystem.cpp" />
     <ClCompile Include="core\Buffer.cpp" />
     <ClCompile Include="core\Shader.cpp" />
     <ClCompile Include="core\Types.cpp" />
@@ -153,6 +154,7 @@
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="app\ParticleSystem.hpp" />
     <ClInclude Include="core\Buffer.hpp" />
     <ClInclude Include="core\Shader.hpp" />
     <ClInclude Include="core\Types.hpp" />

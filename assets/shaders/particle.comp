@@ -1,38 +1,53 @@
 #version 450 core
-
-// Work Group Size
-layout(local_size_x = 128, local_size_y = 1, local_size_z = 1) in;
+layout(local_size_x = 128) in;
 
 struct Particle {
-    vec4 position; // .w = life
+    vec4 position;
     vec4 velocity;
     vec4 color;
 };
 
-// 綁定到 binding = 0
 layout(std430, binding = 0) buffer ParticleSSBO {
     Particle particles[];
 };
 
-uniform float dt;     // Delta Time
-uniform int pCount;   // 粒子總數
+uniform float dt;
+uniform int pCount;
+uniform float time; 
+
+float rand(vec2 co){
+    return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
+}
 
 void main() {
     uint id = gl_GlobalInvocationID.x;
-    
-    // 防止越界
     if (id >= pCount) return;
 
-    // 1. 讀取數據
     Particle p = particles[id];
 
-    // 2. 物理計算 (簡單的重力模擬)
-    // y 軸速度減少 (重力)
-    p.velocity.y += -9.8 * dt;
-    
-    // 更新位置
+    // 物理計算
+    p.velocity.y += -9.8 * dt; // 重力
     p.position.xyz += p.velocity.xyz * dt;
+    
+    // 隨高度變色
+    p.color = vec4(1.0, 0.5 + p.position.y * 0.1, 0.0, 1.0);
 
-    // 3. 寫回數據
+    // Respawn
+    // 如果掉到太下面 (y < -10) 或者生命週期結束
+    if (p.position.y < -10.0) {
+        // reset
+        p.position.xyz = vec3(0.0, 0.0, 0.0);
+        
+        // 給予隨機向上的初速度
+        float r1 = rand(vec2(id, time));
+        float r2 = rand(vec2(id + 100, time));
+        float r3 = rand(vec2(id + 200, time));
+
+        // x, z 隨機擴散，y 向上噴發
+        p.velocity.x = (r1 - 0.5) * 5.0; // -2.5 ~ 2.5
+        p.velocity.y = 15.0 + r2 * 5.0;  // 15 ~ 20
+        p.velocity.z = (r3 - 0.5) * 5.0; // -2.5 ~ 2.5
+    }
+
     particles[id] = p;
 }

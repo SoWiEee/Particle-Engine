@@ -10,13 +10,17 @@ layout(std430, binding = 0) readonly buffer ParticleSSBO {
     Particle particles[];
 };
 
-uniform mat4 view;
-uniform mat4 projection;
+out vec4 vColor;
 
 void main() {
-    // 直接用 gl_VertexID 索引 SSBO
-    Particle p = particles[gl_VertexID]; 
+    Particle p = particles[gl_VertexID];
+
+    // 把世界縮小 10 倍放入螢幕
+    vec3 pos = p.position.xyz * 0.1; 
     
-    gl_Position = projection * view * p.position;
-    // ... 傳遞顏色給 fragment shader
+    gl_Position = vec4(pos, 1.0);
+    
+    gl_PointSize = 2.0;
+
+    vColor = p.color;
 }
