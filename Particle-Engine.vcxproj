@@ -158,7 +158,8 @@
     <None Include="assets\shaders\particle.comp" />
     <None Include="assets\shaders\particle.frag" />
     <None Include="assets\shaders\particle.vert" />
-    <None Include="assets\shaders\Scene.frag" />
+    <None Include="assets\shaders\particle_mesh.frag" />
+    <None Include="assets\shaders\particle_mesh.vert" />
     <None Include="LICENSE" />
     <None Include="README.md" />
   </ItemGroup>

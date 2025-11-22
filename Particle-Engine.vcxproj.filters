@@ -70,8 +70,9 @@
     <None Include="assets\shaders\particle.vert" />
     <None Include="assets\shaders\particle.frag" />
     <None Include="assets\shaders\particle.comp" />
-    <None Include="assets\shaders\Scene.frag" />
     <None Include=".gitignore" />
+    <None Include="assets\shaders\particle_mesh.frag" />
+    <None Include="assets\shaders\particle_mesh.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\Window.hpp">

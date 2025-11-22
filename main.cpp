@@ -54,8 +54,9 @@ int main() {
 
         ParticleSystem particleSystem(1000000);
         glEnable(GL_PROGRAM_POINT_SIZE);
-        glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        glEnable(GL_DEPTH_TEST);
+        glDepthMask(GL_TRUE);
 
         float deltaTime = 0.0f;
         float lastFrame = 0.0f;
