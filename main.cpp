@@ -4,6 +4,7 @@
 #include <string>
 #include <functional>
 #include "core/Window.hpp"
+#include "core/Shader.hpp"
 
 extern "C" {
     __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
@@ -11,17 +12,19 @@ extern "C" {
 
 int main() {
     try {
-        Window window(1280, 720, "GPU Particles - Stage 1");
+        Window window(1280, 720, "GPU Particles - Stage 2");
+
+        Shader computeShader("assets/shaders/particle.comp");
+
+        std::cout << "Compute Shader compiled successfully! ID: " << computeShader.getID() << std::endl;
 
         while (!window.shouldClose()) {
             window.pollEvents();
-
             if (glfwGetKey(window.getNativeWindow(), GLFW_KEY_ESCAPE) == GLFW_PRESS)
                 glfwSetWindowShouldClose(window.getNativeWindow(), true);
 
-            // render command
             glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glClear(GL_COLOR_BUFFER_BIT);
 
             window.swapBuffers();
         }
@@ -30,6 +33,5 @@ int main() {
         std::cerr << "Error: " << e.what() << std::endl;
         return -1;
     }
-
     return 0;
 }
