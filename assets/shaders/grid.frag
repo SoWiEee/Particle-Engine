@@ -6,8 +6,11 @@ out vec4 FragColor;
 uniform vec3 cameraPos;
 uniform float farPlane;
 uniform float boundarySize;
+uniform vec3 attractorPos;       // 光源位置
+uniform float attractorStrength; // 光源強度
+uniform vec3 lightColor;         // 術式顏色
 
-// 網格生成函數
+
 float grid(vec3 worldPos, float scale) {
     vec2 coord = worldPos.xz * scale; // 只看 XZ 平面
     vec2 derivative = fwidth(coord);
@@ -27,13 +30,30 @@ void main() {
     // 混合大小格子，讓大格子比較亮
     float gridPattern = max(g1 * 0.8, g2 * 0.3);
 
-    // 2. 邊界發光 (Boundary Glow)
-    // 讓我們知道牆壁在哪裡
+    // 動態光照計算
+    // 簡單的 Point Light 衰減
+    float distToLight = distance(WorldPos, attractorPos);
+    // 互動範圍大約 40，所以光照範圍設稍大一點
+    float attenuation = 1.0 / (distToLight * distToLight * 0.01 + 1.0);
+
+    vec3 lighting = vec3(0.0);
+    if (attractorStrength != 0.0) {
+        // 根據強度決定亮度，abs() 因為赫是負的
+        float intensity = abs(attractorStrength) * 0.02; 
+        lighting = lightColor * intensity * attenuation;
+    }
+
+    // 基礎地板色 + 網格 + 光照
+    vec3 floorColor = vec3(0.05);
+    vec3 finalColor = floorColor + vec3(0.6) * gridPattern;
+    
+    // 疊加光照
+    finalColor += lighting * 0.5; // 地板會被照亮
+
+    // Boundary Glow
     float distToEdgeX = abs(WorldPos.x) - boundarySize;
     float distToEdgeZ = abs(WorldPos.z) - boundarySize;
     float edgeGlow = 0.0;
-    
-    // 如果靠近邊界 (例如 2 單位內)，就發光
     if (abs(distToEdgeX) < 1.0 || abs(distToEdgeZ) < 1.0) {
         edgeGlow = 1.0;
     }
