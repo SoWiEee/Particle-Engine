@@ -20,16 +20,18 @@ extern "C" {
 }
 
 Camera camera(glm::vec3(0.0f, 10.0f, 40.0f));
+
 float lastX = 640, lastY = 360;
 bool firstMouse = true;
 bool uiMode = false; // 按 Space 切換：控制相機 <-> 控制 UI
+bool lastInsertState = false;
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
-    if (uiMode) return; // UI 模式時不轉動相機
+    if (uiMode) return;
 
     if (firstMouse) { lastX = xpos; lastY = ypos; firstMouse = false; }
     float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos; // y 座標相反
+    float yoffset = lastY - ypos;
     lastX = xpos; lastY = ypos;
     camera.ProcessMouseMovement(xoffset, yoffset);
 }
@@ -48,7 +50,7 @@ int main() {
         ImGui_ImplGlfw_InitForOpenGL(window.getNativeWindow(), true);
         ImGui_ImplOpenGL3_Init("#version 450");
 
-        ParticleSystem particleSystem(50000); // 試試 5萬
+        ParticleSystem particleSystem(50000);
 
         float deltaTime = 0.0f;
         float lastFrame = 0.0f;
@@ -61,27 +63,34 @@ int main() {
             window.pollEvents();
             GLFWwindow* nativeWin = window.getNativeWindow();
 
-            // 輸入處理
+            // input handle
             if (glfwGetKey(nativeWin, GLFW_KEY_ESCAPE) == GLFW_PRESS)
                 glfwSetWindowShouldClose(nativeWin, true);
 
-            // 切換 UI 模式 (按住 Space 顯示滑鼠)
-            if (glfwGetKey(nativeWin, GLFW_KEY_SPACE) == GLFW_PRESS) {
-                uiMode = true;
-                glfwSetInputMode(nativeWin, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            // switch UI mode
+            bool currentInsertState = glfwGetKey(window.getNativeWindow(), GLFW_KEY_INSERT) == GLFW_PRESS;
+            if (currentInsertState && !lastInsertState) {
+                uiMode = !uiMode; // 切換模式
+
+                if (uiMode) {
+                    // UI 模式：顯示滑鼠，停止相機轉動
+                    glfwSetInputMode(window.getNativeWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                }
+                else {
+                    // 漫遊模式：隱藏滑鼠，重置 firstMouse 防止視角跳動
+                    glfwSetInputMode(window.getNativeWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                    firstMouse = true;
+                }
             }
-            else {
-                uiMode = false;
-                glfwSetInputMode(nativeWin, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-            }
+			lastInsertState = currentInsertState;   // update state
 
             if (!uiMode) {
                 if (glfwGetKey(nativeWin, GLFW_KEY_W) == GLFW_PRESS) camera.ProcessKeyboard(FORWARD, deltaTime);
                 if (glfwGetKey(nativeWin, GLFW_KEY_S) == GLFW_PRESS) camera.ProcessKeyboard(BACKWARD, deltaTime);
                 if (glfwGetKey(nativeWin, GLFW_KEY_A) == GLFW_PRESS) camera.ProcessKeyboard(LEFT, deltaTime);
                 if (glfwGetKey(nativeWin, GLFW_KEY_D) == GLFW_PRESS) camera.ProcessKeyboard(RIGHT, deltaTime);
-                if (glfwGetKey(nativeWin, GLFW_KEY_Q) == GLFW_PRESS) camera.ProcessKeyboard(DOWN, deltaTime); // 降
-                if (glfwGetKey(nativeWin, GLFW_KEY_E) == GLFW_PRESS) camera.ProcessKeyboard(UP, deltaTime);   // 升
+                if (glfwGetKey(nativeWin, GLFW_KEY_Q) == GLFW_PRESS) camera.ProcessKeyboard(DOWN, deltaTime);
+                if (glfwGetKey(nativeWin, GLFW_KEY_E) == GLFW_PRESS) camera.ProcessKeyboard(UP, deltaTime);
             }
 
             // 渲染流程
@@ -91,9 +100,6 @@ int main() {
             // 1. 更新與繪製粒子
             particleSystem.onUpdate(deltaTime, currentFrame);
 
-            // 開啟深度測試與混合
-            // 注意：渲染半透明粒子時，通常會關閉 Depth Write (glDepthMask(GL_FALSE)) 
-            // 但開啟 Depth Test，這樣粒子才不會互擋太嚴重，但會有排序問題 (Addtive Blending 不怕排序)
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE); // Additive
             particleSystem.onRender(camera);
@@ -124,7 +130,6 @@ int main() {
             window.swapBuffers();
         }
 
-        // 清理
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
