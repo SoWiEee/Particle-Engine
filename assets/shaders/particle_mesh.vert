@@ -29,7 +29,7 @@ void main() {
     // 我們先做最簡單的：位移 + 縮放
     
     // 基礎大小：假設 pointScale 是 2000，我們先縮小一點讓石頭合理
-    float size = pointScale * 0.0002; 
+    float size = pointScale * 0.00002; 
     
     // 根據速度稍微拉長石頭 (Stretch)，增加速度感
     vec3 scale = vec3(size);
